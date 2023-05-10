@@ -30,6 +30,7 @@ class Cart_Type {
 		self::register_cart_fee();
 		self::register_cart_tax();
 		self::register_applied_coupon();
+		self::register_current_shipping_methods_with_id();
 		self::register_cart_item();
 		self::register_cart();
 	}
@@ -131,6 +132,7 @@ class Cart_Type {
 
 						foreach ( $available_packages as $index => $package ) {
 							$package['index'] = $index;
+							$package['selected_method'] = \WC()->session->chosen_shipping_methods[ $index ];
 							$packages[]       = $package;
 						}
 
@@ -154,6 +156,30 @@ class Cart_Type {
 						}
 
 						return $chosen_shipping_methods;
+					},
+				],
+				'currentShippingMethods'    => [
+					'type'        => [ 'list_of' => 'CurrentShippingMethodsWithId' ],
+					'description' => __( 'Shipping method chosen for this order.', 'wp-graphql-woocommerce' ),
+					'resolve'     => function( $source ) {
+						$current_shipping_methods = [];
+
+						$available_packages = $source->needs_shipping()
+							? \WC()->shipping()->calculate_shipping( $source->get_shipping_packages() )
+							: [];
+
+						foreach ( $available_packages as $i => $package ) {
+							if ( isset( \WC()->session->chosen_shipping_methods[ $i ] ) ) {
+								$item = [
+									'id' => $package['id'],
+									'method' => \WC()->session->chosen_shipping_methods[ $i ],
+								];
+
+								$current_shipping_methods[$i] = $item;
+							}
+						}
+
+						return $current_shipping_methods;
 					},
 				],
 				'shippingTotal'            => [
@@ -879,6 +905,34 @@ class Cart_Type {
 						'resolve'     => function( $source, array $args ) {
 							$coupon = new \WC_Coupon( $source );
 							return $coupon->get_description();
+						},
+					],
+				],
+			]
+		);
+	}
+
+	/**
+	 * Registers CurrentShippingMethodsWithId type
+	 */
+	public static function register_current_shipping_methods_with_id() {
+		register_graphql_object_type(
+			'CurrentShippingMethodsWithId',
+			[
+				'description' => __( 'Extended current shipping methods', 'wp-graphql-woocommerce' ),
+				'fields'      => [
+					'id'           => [
+						'type'        => [ 'non_null' => 'Int' ],
+						'description' => __( 'Shipping id.', 'wp-graphql-woocommerce' ),
+						'resolve'     => function( $source ) {
+							return $source['id'];
+						},
+					],
+					'method'           => [
+						'type'        => [ 'non_null' => 'String' ],
+						'description' => __( 'Shipping name.', 'wp-graphql-woocommerce' ),
+						'resolve'     => function( $source ) {
+							return $source['method'];
 						},
 					],
 				],

@@ -270,6 +270,39 @@ class Cart_Mutation {
 		return $chosen_shipping_methods;
 	}
 
+    /**
+     * Validates and prepares posted shipping methods from the extended type with ID for the user session. It is useful if you use plugins for shipping packages.
+     *
+     * @param array $posted_shipping_methods  Chosen shipping methods.
+     *
+     * @throws UserError  Invalid shipping method.
+     *
+     * @return array
+     */
+    public static function prepare_shipping_methods_based_on_ids( $posted_shipping_methods ) {
+        // Get current shipping methods.
+        $chosen_shipping_methods = \WC()->session->get( 'chosen_shipping_methods' );
+
+        // Update current shipping methods.
+        foreach ( $posted_shipping_methods as $chosen_method ) {
+            if ( empty( $chosen_method ) ) {
+                continue;
+            }
+
+            $key = $chosen_method['id'];
+            $method = $chosen_method['method'];
+
+            $reason = '';
+            if ( self::validate_shipping_method( $method, $key, $reason ) ) {
+                $chosen_shipping_methods[ $key ] = $method;
+            } else {
+                throw new UserError( $reason );
+            }
+        }
+
+        return $chosen_shipping_methods;
+    }
+
 	/**
 	 * Validate CartItemQuantityInput item.
 	 *

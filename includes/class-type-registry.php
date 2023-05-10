@@ -57,6 +57,7 @@ class Type_Registry {
 		Type\WPInputObject\Product_Taxonomy_Filter_Input::register();
 		Type\WPInputObject\Product_Taxonomy_Input::register();
 		Type\WPInputObject\Orderby_Inputs::register();
+		Type\WPInputObject\Cart_Shipping_Method_Input::register();
 
 		// Interfaces.
 		Type\WPInterface\Product::register_interface();
@@ -121,6 +122,7 @@ class Type_Registry {
 		Mutation\Cart_Remove_Coupons::register_mutation();
 		Mutation\Cart_Add_Fee::register_mutation();
 		Mutation\Cart_Update_Shipping_Method::register_mutation();
+		Mutation\Cart_Update_Shipping_Method_With_Ids::register_mutation();
 		Mutation\Cart_Fill::register_mutation();
 		Mutation\Order_Create::register_mutation();
 		Mutation\Order_Update::register_mutation();

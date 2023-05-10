@@ -54,6 +54,33 @@ class Shipping_Package_Type {
 							return apply_filters( 'woocommerce_shipping_show_shipping_calculator', true, $source['index'], $source );
 						},
 					],
+					'productNames' => [
+						'type'        => ['list_of' => 'String'],
+						'description' => __( 'Product names as an array.', 'wp-graphql-woocommerce' ),
+						'resolve'     => function( $source ) {
+							$product_names = [];
+
+							foreach ( $source['contents'] as $item_id => $values ) {
+								array_push($product_names, $values['data']->get_name());
+							}
+
+							return $product_names;
+						},
+					],
+					'id' => [
+						'type'        => 'Int',
+						'description' => __( 'Shipping id.', 'wp-graphql-woocommerce' ),
+						'resolve'     => function( $source ) {
+							return $source['index'];
+						},
+					],
+					'selectedMethod' => [
+						'type'        => 'String',
+						'description' => __( 'Selected shipping method.', 'wp-graphql-woocommerce' ),
+						'resolve'     => function( $source ) {
+							return $source['selected_method'];
+						},
+					],
 				],
 			]
 		);
